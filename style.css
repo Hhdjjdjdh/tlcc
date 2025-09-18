@@ -1,0 +1,23 @@
+
+/* 自定义样式补充 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+table {
+    min-width: 1000px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    #addForm {
+        grid-template-columns: 1fr;
+    }
+}
