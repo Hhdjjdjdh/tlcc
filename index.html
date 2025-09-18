@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日常管理追踪表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">日常管理追踪表</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">添加新记录</h2>
+            <form id="addForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">序号</label>
+                    <input type="number" id="serialNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">问题点描述</label>
+                    <input type="text" id="issueDesc" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">改善对策</label>
+                    <input type="text" id="solution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">责任人</label>
+                    <input type="text" id="responsible" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">完成时间</label>
+                    <input type="date" id="dueDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                </div>
+                <div class="col-span-5 text-right">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <i class="fas fa-plus mr-2"></i>添加记录
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">追踪记录表</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序号</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">问题点描述</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">改善对策</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">责任人</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">完成时间</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTable" class="bg-white divide-y divide-gray-200">
+                        <!-- 记录将在这里动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化记录数组
+        let records = JSON.parse(localStorage.getItem('issueRecords')) || [];
+        
+        // DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderRecords();
+            
+            // 添加表单提交事件
+            document.getElementById('addForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addNewRecord();
+            });
+        });
+        
+        // 添加新记录
+        function addNewRecord() {
+            const serialNumber = document.getElementById('serialNumber').value;
+            const issueDesc = document.getElementById('issueDesc').value;
+            const solution = document.getElementById('solution').value;
+            const responsible = document.getElementById('responsible').value;
+            const dueDate = document.getElementById('dueDate').value;
+            
+            const newRecord = {
+                id: Date.now(),
+                serialNumber,
+                issueDesc,
+                solution,
+                responsible,
+                dueDate,
+                status: '待处理'
+            };
+            
+            records.push(newRecord);
+            saveRecords();
+            renderRecords();
+            document.getElementById('addForm').reset();
+        }
+        
+        // 渲染记录表格
+        function renderRecords() {
+            const tableBody = document.getElementById('recordsTable');
+            tableBody.innerHTML = '';
+            
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${record.serialNumber}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.issueDesc}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.solution}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.responsible}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(record.dueDate)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${record.status === '已完成' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${record.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="toggleStatus(${record.id})" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <i class="fas fa-check-circle"></i>
+                        </button>
+                        <button onclick="editRecord(${record.id})" class="text-yellow-600 hover:text-yellow-900 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteRecord(${record.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 切换状态
+        function toggleStatus(id) {
+            const record = records.find(r => r.id === id);
+            if (record) {
+                record.status = record.status === '待处理' ? '已完成' : '待处理';
+                saveRecords();
+                renderRecords();
+            }
+        }
+        
+        // 编辑记录
+        function editRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (record) {
+                document.getElementById('serialNumber').value = record.serialNumber;
+                document.getElementById('issueDesc').value = record.issueDesc;
+                document.getElementById('solution').value = record.solution;
+                document.getElementById('responsible').value = record.responsible;
+                document.getElementById('dueDate').value = record.dueDate;
+                
+                // 删除原记录
+                records = records.filter(r => r.id !== id);
+                saveRecords();
+            }
+        }
+        
+        // 删除记录
+        function deleteRecord(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                records = records.filter(r => r.id !== id);
+                saveRecords();
+                renderRecords();
+            }
+        }
+        
+        // 保存记录到本地存储
+        function saveRecords() {
+            localStorage.setItem('issueRecords', JSON.stringify(records));
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            return new Date(dateString).toLocaleDateString('zh-CN', options);
+        }
+    </script>
+</body>
+</html>
